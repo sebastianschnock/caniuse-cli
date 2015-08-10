@@ -1,0 +1,5 @@
+cat data.json | underscore extract data | underscore find 'key == "css-boxshadow"' | underscore extract title | underscore pretty
+
+cat data.json | jq '.data["css-boxshadow"].title'
+cat data.json | jq '.data["css-boxshadow"].stats'
+
