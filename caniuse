@@ -40,11 +40,14 @@ function printBrowserSupport {
 	fi
 }
 
-property=$(findProperty $1)
-echo $property | jq '.title'
-printBrowserSupport "IE" "ie" "$property"
-printBrowserSupport "FF" "firefox" "$property"
-printBrowserSupport "Chrome" "chrome" "$property"
-printBrowserSupport "IOS" "ios_saf" "$property"
-printBrowserSupport "Android" "android" "$property"
-echo
+for propertyName in $(cat $DATA | jq -r '.data | keys | .[]' | grep $1); do
+	propertyData=$(findProperty $propertyName)
+	echo $propertyName
+	echo $propertyData | jq '.title'
+	printBrowserSupport "IE" "ie" "$propertyData"
+	printBrowserSupport "FF" "firefox" "$propertyData"
+	printBrowserSupport "Chrome" "chrome" "$propertyData"
+	printBrowserSupport "IOS" "ios_saf" "$propertyData"
+	printBrowserSupport "Android" "android" "$propertyData"
+	echo
+done
