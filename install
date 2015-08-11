@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo apt-get install -y jq
+sudo ln -sf `pwd`/caniuse /usr/local/bin
