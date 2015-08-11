@@ -19,18 +19,23 @@ function isSupportedInBrowser {
 		local unquotedVersion=$(echo $version | sed -s "s/^\([\"']\)\(.*\)\1\$/\2/g")
 		local isSupported=$(echo $browserData | jq --arg version $unquotedVersion '.[$version]')
 		if [[ $isSupported == "\"y\"" ]]; then
+			# feature is supported
 			echo "true"
 			return 0
 		fi
 	done
+
+	# feature is not supported
 	echo "false"
 }
 
 function printBrowserSupport {
 
 	if [[ $(isSupportedInBrowser $2 $3) == "true" ]]; then
+		# supported
 		echo -en "\033[42m\033[1m" $1 "\033[0m" " "
 	else
+		# not supported
 		echo -en "\033[41m\033[1m" $1 "\033[0m" " "
 	fi
 }
