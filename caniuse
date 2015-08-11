@@ -1,31 +1,42 @@
 #!/bin/bash
 
-DATA=data.json
+DATA="data.json"
 
-function findProperty() {
+function findProperty {
 	cat $DATA | jq -c --arg property $1 '.data[$property]'
 }
 
-function findBrowserVersion() {
+function isSupportedInBrowser {
 
 	local browser=$1
 	shift
 	local browser_data=$(echo $* | jq -c --arg browser $browser '.stats[$browser]')
-	# echo "browser_data:" $browser_data
-
-	count=$(echo $browser_data | jq 'length')
-	for((i=0;i<$count;i++))
+	for key in $(echo $browser_data | jq 'keys | .[]')
 	do
-		# test=$(jq '.['${i}']' $browser_data)
-		test=$(jq 'keys | .['${i}']' $browser_data)
-		echo $test
+		unquoted_key=$(echo $key | sed -s "s/^\([\"']\)\(.*\)\1\$/\2/g")
+		value=$(echo $browser_data | jq --arg key $unquoted_key '.[$key]')
+		if [[ $value == "\"y\"" ]]; then
+			echo "true"
+			return 0
+		fi
 	done
-	# echo $count
+	echo "false"
+}
 
-	echo $browser_data
+function printBrowserSupport {
+
+	if [[ $(isSupportedInBrowser $2 $3) == "true" ]]; then
+		echo -en "\033[42m\033[1m" $1 "\033[0m" " "
+	else
+		echo -en "\033[41m\033[1m" $1 "\033[0m" " "
+	fi
 }
 
 property=$(findProperty $1)
-# echo $property | jq '.title'
-browser_version=$(findBrowserVersion "ie" $property)
-# echo $browser_version
+echo $property | jq '.title'
+printBrowserSupport "IE" "ie" "$property"
+printBrowserSupport "FF" "firefox" "$property"
+printBrowserSupport "Chrome" "chrome" "$property"
+printBrowserSupport "IOS" "ios_saf" "$property"
+printBrowserSupport "Android" "android" "$property"
+echo
