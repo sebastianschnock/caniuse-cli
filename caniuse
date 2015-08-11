@@ -1,0 +1,31 @@
+#!/bin/bash
+
+DATA=data.json
+
+function findProperty() {
+	cat $DATA | jq -c --arg property $1 '.data[$property]'
+}
+
+function findBrowserVersion() {
+
+	local browser=$1
+	shift
+	local browser_data=$(echo $* | jq -c --arg browser $browser '.stats[$browser]')
+	# echo "browser_data:" $browser_data
+
+	count=$(echo $browser_data | jq 'length')
+	for((i=0;i<$count;i++))
+	do
+		# test=$(jq '.['${i}']' $browser_data)
+		test=$(jq 'keys | .['${i}']' $browser_data)
+		echo $test
+	done
+	# echo $count
+
+	echo $browser_data
+}
+
+property=$(findProperty $1)
+# echo $property | jq '.title'
+browser_version=$(findBrowserVersion "ie" $property)
+# echo $browser_version
