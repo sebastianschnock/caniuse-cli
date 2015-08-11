@@ -9,13 +9,16 @@ function findProperty {
 function isSupportedInBrowser {
 
 	local browser=$1
+	# get supported information for browser
 	shift
-	local browser_data=$(echo $* | jq -c --arg browser $browser '.stats[$browser]')
-	for key in $(echo $browser_data | jq 'keys | .[]')
+	local browserData=$(echo $* | jq -c --arg browser $browser '.stats[$browser]')
+	
+	# check every version for support
+	for version in $(echo $browserData | jq 'keys | .[]')
 	do
-		unquoted_key=$(echo $key | sed -s "s/^\([\"']\)\(.*\)\1\$/\2/g")
-		value=$(echo $browser_data | jq --arg key $unquoted_key '.[$key]')
-		if [[ $value == "\"y\"" ]]; then
+		local unquotedVersion=$(echo $version | sed -s "s/^\([\"']\)\(.*\)\1\$/\2/g")
+		local isSupported=$(echo $browserData | jq --arg version $unquotedVersion '.[$version]')
+		if [[ $isSupported == "\"y\"" ]]; then
 			echo "true"
 			return 0
 		fi
