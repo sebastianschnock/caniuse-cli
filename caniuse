@@ -32,6 +32,40 @@ function printBrowserSupport {
 	fi
 }
 
+function findBrowserVersion {
+
+	local browser=$1
+	# shift
+	local browser_data=$(echo $2 | jq -c --arg browser $browser '.stats[$browser]')
+	# echo "browser_data:" $browser_data
+
+	# echo $browser_data
+	# echo $browser_data | jq 'keys | .[]'
+	max=0
+	for key in $(echo $browser_data | jq 'keys | .[]')
+	do
+		# echo "key" $key
+		unquoted_key=$(echo $key | sed -s "s/^\([\"']\)\(.*\)\1\$/\2/g")
+		# echo "unquoted" $unquoted_key
+		# undashed_key=$(echo $unquoted_key | sed -s "s/\(.*\)\(^[^-]\)\1\$/\2/g")
+		# echo $key | grep "^[^-]*"
+		undashed_key=$(echo $unquoted_key | grep -o "^[^-]*")
+		# echo "undashed" $undashed_key
+
+		value=$(echo $browser_data | jq --arg key $unquoted_key '.[$key]')
+		# echo "value" $value
+		if [[ $value == "\"y\"" ]]; then
+			# echo "yes!"
+			# force arithmetic context with (())
+			# use bc to work with floating point numbers
+			if (( $(echo $undashed_key ">" $max | bc -l) == 1)); then
+				max=$undashed_key
+			fi
+		fi
+	done
+	echo $max
+}
+
 property=$(findProperty $1)
 echo $property | jq '.title'
 printBrowserSupport "IE" "ie" "$property"
