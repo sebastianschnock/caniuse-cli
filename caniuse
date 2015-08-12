@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
 
 DATA="/tmp/data.json"
 
@@ -6,7 +8,6 @@ function loadData {
 	# update data.json every week
 	if [ ! -f $DATA ] || test "`find /tmp/data.json -mtime +7`"; then
 		wget https://github.com/Fyrd/caniuse/raw/master/data.json -O $DATA
-	else
 	fi
 }
 
