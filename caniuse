@@ -1,6 +1,16 @@
 #!/bin/bash
 
-DATA="data.json"
+DATA="/tmp/data.json"
+
+function loadData {
+	# update data.json every week
+	if [ ! -f $DATA ] || test "`find /tmp/data.json -mtime +7`"; then
+		echo "should download file"
+		wget https://github.com/Fyrd/caniuse/raw/master/data.json -O $DATA
+	else
+		echo "file is fine"
+	fi
+}
 
 function findProperty {
 	cat $DATA | jq -c --arg property $1 '.data[$property]'
@@ -39,6 +49,9 @@ function printBrowserSupport {
 		echo -en "\033[41m\033[1m" $1 "\033[0m" " "
 	fi
 }
+
+# update data.json
+loadData
 
 for propertyName in $(cat $DATA | jq -r '.data | keys | .[]' | grep $1); do
 	propertyData=$(findProperty $propertyName)
